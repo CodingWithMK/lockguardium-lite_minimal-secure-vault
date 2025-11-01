@@ -1,0 +1,15 @@
+[project]
+name = "lockguardium-lite"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "cryptography>=46.0.3",
+    "customtkinter>=5.2.2",
+]
+
+[tool.uv.workspace]
+members = [
+    "lockguardium-lite",
+]

@@ -6,7 +6,7 @@ import sqlite3
 import base64
 import os
 
-DB_PATH = "data/vault.db"
+DB_PATH = "data/test_vault.db"
 SALT_PATH = "data/salt.bin"
 
 def ensure_data_dir():
@@ -49,25 +49,25 @@ def create_db():
         conn.commit()
 
 def save_password(website, username, password, key):
-    encrypted = encrypt_passwords(key, password)
-    conn = sqlite3.connect("data/test_vault.db")
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO passwords (website, username, password)
-                   VALUES (?, ?, ?)''',
-                   (website, username, encrypted))
-    conn.commit()
-    conn.close()
+    encrypted_username = encrypt_passwords(key, username)
+    encrypted_pw = encrypt_passwords(key, password)
+    ensure_data_dir()
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO passwords (website, username, password)
+                    VALUES (?, ?, ?)''',
+                    (website, encrypted_username, encrypted_pw))
+        conn.commit()
 
 def get_passwords(key):
-    conn = sqlite3.connect("data/test_vault.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT website, username, password FROM passwords")
-    for row in cursor.fetchall():
-        website, username, encrypt_pw = row
-        decrypted = decrypt_passwords(key, encrypt_pw)
-        print(f"Website: {website} | Username: {username} | Password: {decrypted}")
-    conn.close()
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT website, username, password FROM passwords")
+        for website, enc_user, enc_pw in cursor.fetchall():
+            user = decrypt_passwords(key, enc_user)
+            password = decrypt_passwords(key, enc_pw)
+            print(f"Website: {website} | Username: {user} | Password: {password}")
 
 def load_or_create_salt():
     """Load the salt from a file or create a new one if it does not exist."""

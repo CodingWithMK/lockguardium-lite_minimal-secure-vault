@@ -6,6 +6,11 @@ import sqlite3
 import base64
 import os
 
+DB_PATH = "data/vault.db"
+SALT_PATH = "data/salt.bin"
+
+def ensure_data_dir():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
 def get_key_from_password(password, salt):    
     kdf = PBKDF2HMAC(
@@ -27,18 +32,21 @@ def decrypt_passwords(key, token):
     return fernet.decrypt(token).decode()
 
 def create_db():
-    conn = sqlite3.connect("data/test_vault.db")
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS passwords (
-                   id INTEGER PRIMARY KEY,
-                   website TEXT NOT NULL,
-                   username TEXT NOT NULL,
-                   password BLOB NOT NULL
-        )
-    ''')
-    conn.commit()
-    conn.close()
+    """Init DB - uses context manager so connections always closed."""
+    ensure_data_dir()
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS passwords (
+                    id INTEGER PRIMARY KEY,
+                    website TEXT NOT NULL,
+                    username BLOB NOT NULL,
+                    password BLOB NOT NULL
+            )
+        ''')
+
+        # optional: Small settings table for verifier token
+        conn.commit()
 
 def save_password(website, username, password, key):
     encrypted = encrypt_passwords(key, password)
@@ -63,13 +71,14 @@ def get_passwords(key):
 
 def load_or_create_salt():
     """Load the salt from a file or create a new one if it does not exist."""
-    if not os.path.exists('salt.bin'):
+    ensure_data_dir()
+    if not os.path.exists(SALT_PATH):
         salt = os.urandom(16)
-        with open('salt.bin', 'wb') as file:
+        with open(SALT_PATH, 'wb') as file:
             file.write(salt)
 
     else:
-        with open('salt.bin', 'rb') as file:
+        with open(SALT_PATH, 'rb') as file:
             salt = file.read()
     
     return salt

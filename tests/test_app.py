@@ -25,9 +25,18 @@ class LockGuardiumLiteApp(CTk):
         self.logo_label = CTk.CTkLabel(self.sidebar_frame, text="LockGuardium Lite", font=CTk.CTkFont(size=20, weight="bold"))
         self.sidebar_button_1 = CTk.CTkButton(self.sidebar_frame, command=self.sidebar_button_event)
         self.sidebar_button_1.grid(row=1, column=0, padx=20, pady=10)
-        self.sidebar_button_1 = CTk.CTkButton(self.sidebar_frame, command=self.sidebar_button_event)
-        self.sidebar_button_1.grid(row=2, column=0, padx=20, pady=10)
-        self.sidebar_button_1 = CTk.CTkButton(self.sidebar_frame, command=self.sidebar_button_event)
-        self.sidebar_button_1.grid(row=3, column=0, padx=20, pady=10)
+        self.sidebar_button_2 = CTk.CTkButton(self.sidebar_frame, command=self.sidebar_button_event)
+        self.sidebar_button_2.grid(row=2, column=0, padx=20, pady=10)
+        self.sidebar_button_3 = CTk.CTkButton(self.sidebar_frame, command=self.sidebar_button_event)
+        self.sidebar_button_3.grid(row=3, column=0, padx=20, pady=10)
+
+        self.appearance_mode_label = CTk.CTkButton(self.sidebar_frame, text="Appearance Mode:", anchor="w")
+        self.appearance_mode_label.grid(row=5, column=0, padx=20, pady=(10, 0))
+        self.appearance_mode_optionmenu = CTk.CTkOptionMenu(self.sidebar_frame, values=["Light", "Dark", "System"], command=self.change_appearance_mode_event)
+        self.appearance_mode_optionmenu.grid(row=6, column=0, padx=20, pady=(10, 10))
+
+        
+
+        
 
         

@@ -35,7 +35,48 @@ class LockGuardiumLiteApp(CTk):
         self.appearance_mode_optionmenu = CTk.CTkOptionMenu(self.sidebar_frame, values=["Light", "Dark", "System"], command=self.change_appearance_mode_event)
         self.appearance_mode_optionmenu.grid(row=6, column=0, padx=20, pady=(10, 10))
 
+        self.scaling_label = CTk.CTkLabel(self.sidebar, text="UI Scaling", anchor="w")
+        self.scaling_label.grid(row=7, column=0, padx=20, pady=(10, 0))
+        self.scaling_optionmenu = CTk.CTkOptionMenu(self.sidebar_frame,
+                                                    values=["75%", "80%", "85%", "90%", "95%", "100%", "110%", "120%"],
+                                                    command=self.change_scaling_event
+                                                    )
+        self.scaling_optionmenu.grid(row=8, column=0, padx=20, pady=(10, 20))
+
+        # ========== MAIN WINDOW WIDGETS ===========
+
+        # Main Entry and Widgets
+        self.search_entry = CTk.CTkEntry(self, placeholder="Search...")
+        self.search_entry.grid(row=3, column=1, columnspan=2, padx=(20, 0), pady=(20, 20), sticky="nsew")
+
+        # Greeting Label
+        self.greeting_label = CTk.CTkLabel(self, width=80, height=15, text="Welcome back!", text_color="#fff")
+        self.greeting_label.grid(row=0, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew")
+
+        # Main frame
+        self.main_frame = CTk.CTkFrame(self, width=400, height=300, corner_radius=4, border_color="green", border_width=4)
+        self.main_frame.grid(row=1, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew")
+
+        self.main_frame_title = CTk.CTkLabel(self.main_frame, width=20, height=5, text="My Passwords", text_color="#fff")
+        self.main_frame_title.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+
+        self.main_frame_textbox = CTk.CTkTextbox(self.main_frame, width=380, height=280, corner_radius=5, border_width=2)
+        self.main_frame_textbox.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+
+        # Tabview
+        self.tabview = CTk.CTkTabview(self, width=250)
+        self.tabview.grid(row=1, column=3, padx=(20, 0), pady=(20, 0), sticky="nsew")
+        self.tabview.add("Recent")
+        self.tabview.add("Import")
+        self.tabview.add("Export")
+        self.tabview.tab("Recent").grid_columnconfigure(0, weight=1)
+        self.tabview.tab("Import").grid_columnconfigure(0, weight=1)
+        self.tabview.tab("Export").grid_columnconfigure(0, weight=1)
+
         
+
+
+
 
         
 

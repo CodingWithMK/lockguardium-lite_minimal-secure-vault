@@ -51,4 +51,3 @@ def generate_password(length: int = 12,
 
 if __name__ == "__main__":
     print(generate_password(use_lowercase=True, use_uppercase=True, use_digits=True, use_special_chars=True))
-    assert generate_password(use_lowercase=True, use_uppercase=True, use_digits=True, use_special_chars=True)

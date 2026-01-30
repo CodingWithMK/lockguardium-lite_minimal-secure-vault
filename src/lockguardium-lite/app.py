@@ -1,107 +1,86 @@
-import customtkinter as CTk
-import tkinter as tk
-import tkinter.messagebox
+"""
+LockGuardium Lite - Main Application Entry Point
+Secure Password Vault Application
+"""
 
-CTk.set_appearance_mode("system")
-CTk.set_default_color_theme("dark-blue")
+import customtkinter as ctk
+import os
+import sys
 
-class LockGuardiumLiteApp(CTk.CTk):
+# Add the src directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from ui.login_window import LoginWindow
+from ui.main_window import MainWindow
+from ui.theme import Colors, IS_NEW_USER
+
+
+class LockGuardiumApp:
+    """
+    Main application controller.
+    Manages the application lifecycle and window transitions.
+    """
+
     def __init__(self):
-        super().__init__()
+        self.current_window = None
+        self.is_authenticated = False
 
-        # Window properities
-        self.title("LockGuardium Lite")
-        self.geometry("960x640")
+        # Configure global appearance
+        ctk.set_appearance_mode("dark")
+        ctk.set_default_color_theme("green")
 
-        # Grid layout
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_columnconfigure((2, 3), weight=0)
-        self.grid_rowconfigure((0, 1, 2), weight=1)
+    def run(self):
+        """Start the application."""
+        self._show_login()
 
-        # Sidebar frame
-        self.sidebar_frame = CTk.CTkFrame(self, width=140, corner_radius=0)
-        self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
-        self.sidebar_frame.grid_rowconfigure(4, weight=1)
-        self.logo_label = CTk.CTkLabel(self.sidebar_frame, text="LockGuardium Lite", font=CTk.CTkFont(size=20, weight="bold"))
-        self.sidebar_button_1 = CTk.CTkButton(self.sidebar_frame, command=self.sidebar_button_event)
-        self.sidebar_button_1.grid(row=1, column=0, padx=20, pady=10)
-        self.sidebar_button_2 = CTk.CTkButton(self.sidebar_frame, command=self.sidebar_button_event)
-        self.sidebar_button_2.grid(row=2, column=0, padx=20, pady=10)
-        self.sidebar_button_3 = CTk.CTkButton(self.sidebar_frame, command=self.sidebar_button_event)
-        self.sidebar_button_3.grid(row=3, column=0, padx=20, pady=10)
+    def _show_login(self):
+        """Show the login window."""
+        # Destroy current window if exists
+        if self.current_window:
+            self.current_window.destroy()
 
-        self.appearance_mode_label = CTk.CTkButton(self.sidebar_frame, text="Appearance Mode:", anchor="w")
-        self.appearance_mode_label.grid(row=5, column=0, padx=20, pady=(10, 0))
-        self.appearance_mode_optionmenu = CTk.CTkOptionMenu(self.sidebar_frame, values=["Light", "Dark", "System"], command=self.change_appearance_mode_event)
-        self.appearance_mode_optionmenu.grid(row=6, column=0, padx=20, pady=(10, 10))
+        # Check if this is a new user (placeholder - would check if vault exists)
+        is_new_user = IS_NEW_USER
 
-        self.scaling_label = CTk.CTkLabel(self.sidebar_frame, text="UI Scaling", anchor="w")
-        self.scaling_label.grid(row=7, column=0, padx=20, pady=(10, 0))
-        self.scaling_optionmenu = CTk.CTkOptionMenu(self.sidebar_frame,
-                                                    values=["75%", "80%", "85%", "90%", "95%", "100%", "110%", "120%"],
-                                                    command=self.change_scaling_event
-                                                    )
-        self.scaling_optionmenu.grid(row=8, column=0, padx=20, pady=(10, 20))
+        # Create login window
+        self.current_window = LoginWindow(
+            on_login_success=self._on_login_success, is_new_user=is_new_user
+        )
+        self.current_window.mainloop()
 
-        # ========== MAIN WINDOW WIDGETS ===========
+    def _on_login_success(self):
+        """Handle successful login."""
+        self.is_authenticated = True
 
-        # Main Entry and Widgets
-        self.search_entry = CTk.CTkEntry(self, placeholder_text="Search...")
-        self.search_entry.grid(row=3, column=1, columnspan=2, padx=(20, 0), pady=(20, 20), sticky="nsew")
+        # Destroy login window
+        if self.current_window:
+            self.current_window.destroy()
 
-        # Greeting Label
-        self.greeting_label = CTk.CTkLabel(self, width=80, height=15, text="Welcome back!", text_color="#fff")
-        self.greeting_label.grid(row=0, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew")
+        # Show main vault window
+        self._show_main()
 
-        # Main frame
-        self.main_frame = CTk.CTkFrame(self, width=400, height=300, corner_radius=4, border_color="green", border_width=4)
-        self.main_frame.grid(row=1, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew")
+    def _show_main(self):
+        """Show the main vault window."""
+        self.current_window = MainWindow(on_lock=self._on_lock)
+        self.current_window.mainloop()
 
-        self.main_frame_title = CTk.CTkLabel(self.main_frame, width=20, height=5, text="My Passwords", text_color="#fff")
-        self.main_frame_title.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+    def _on_lock(self):
+        """Handle lock action from main window."""
+        self.is_authenticated = False
 
-        self.main_frame_textbox = CTk.CTkTextbox(self.main_frame, width=380, height=280, corner_radius=5, border_width=2)
-        self.main_frame_textbox.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+        # Destroy main window
+        if self.current_window:
+            self.current_window.destroy()
 
-        # Tabview
-        self.tabview = CTk.CTkTabview(self, width=250)
-        self.tabview.grid(row=1, column=3, padx=(20, 0), pady=(20, 0), sticky="nsew")
-        self.tabview.add("Recent")
-        self.tabview.add("Strength Checker")
-        self.tabview.add("Generator")
-        self.tabview.tab("Recent").grid_columnconfigure(0, weight=1)
-        self.tabview.tab("Strength Checker").grid_columnconfigure(0, weight=1)
-        self.tabview.tab("Generator").grid_columnconfigure(0, weight=1)
-
-        # Strength Checker Tab
-        self.strength_entry = CTk.CTkEntry(self.tabview.tab("Strength Checker"), width=80, height=20, corner_radius=3)
-        self.strength_entry.grid(row=0, column=0, padx=20, pady=(20, 10))
-
-        self.strength_progressbar = CTk.CTkProgressBar(self.tabview.tab("Strength Checker"), orientation="horizontal")
-        self.strength_progressbar.grid(row=1, column=0, padx=20, pady=(20, 10))
+        # Show login window
+        self._show_login()
 
 
-
-
-
-
-    def sidebar_button_event(self):
-        pass
-
-    def change_appearance_mode_event(self):
-        pass
-
-    def change_scaling_event(self):
-        pass
-
+def main():
+    """Main entry point."""
+    app = LockGuardiumApp()
+    app.run()
 
 
 if __name__ == "__main__":
-    app = LockGuardiumLiteApp()
-    app.mainloop()
-
-        
-
-        
-
-        
+    main()

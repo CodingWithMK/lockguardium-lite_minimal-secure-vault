@@ -62,17 +62,14 @@ class PasswordEntry(BaseModel):
     entropy: float = Field(default=0.0, description="Cryptographic strength of the password in bits")
 
     # Strict configuration to prevent unexpected payload injections
-    model_config = ConfigDict(extra="forbid", frozen=False)
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
-    @model_validator(mode="before")
+    @model_validator(mode="after")
     @classmethod
-    def auto_calculate_entropy(cls, data: dict) -> dict:
+    def auto_calculate_entropy(self) -> PasswordEntry:
         """
-        Pre-validator hook to automatically inject the computed password entropy.
-        
-        Ensures that 'entropy' is consistently calculated regardless of how 
-        the instance is initialized, eliminating the need for a manual factory.
+        Post-validator hook that safely calculates entropy 
+        right after the fields have been validated.
         """
-        if isinstance(data, dict) and "password" in data:
-            data["entropy"] = calculate_entropy(data["password"])
-        return data
+        object.__setattr__(self, "entropy", calculate_entropy(self.password))
+        return self
